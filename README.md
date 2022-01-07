@@ -1,25 +1,26 @@
 # Sporulation Utilities
 
-DRAM-v and DRAM are powerful tools that generate massive amounts of data and can distil that information to summarises of organismal metabolism.
+DRAM-v and DRAM are powerful tools that generate massive amounts of data and can distill that information to summaries of organismal metabolism.
 With much power comes much complexity, great time and effort has gone into the metabolic pathways that are included with DRAM/DRAM-v, but these are only the surface of DRAMs potential.
 
-In this Repository we are collecting a set of tools that alow DRAM-v and to an extent DRAM to explore sporutlation and more specicaly the annotate and discover the auxiliary metabolic genes (AMGs) that are key to it.
-The first step of this process is simply to run DRAM-v on the V-MAGs of interest, and then to use DRAM-v's distilation tool to apply a custom distillation module.
-However, after that point science begins and things get tricky, most of the tools in this repo are to help with those next steps.
+In this Repository we are collecting a set of tools that allow DRAM-v, and to an extent DRAM, to explore sporulation, throgh auxiliary metabolic genes (AMGs) that are key to it.
+The first step of this process is simply to run DRAM-v on the V-MAGs of interest, and then to use DRAM-v's distillation tool to apply a custom distillation module.
+However, after that point things get tricky.
+ Most of the tools in this repo are to help with those tricky next steps.
 
-## Setting up Inviroment
+## Setting up Environment
 
-You need to some how install click and pandas in your python environment the how is up to you, you can use conda or pip.
-If you are in the lab and working on Zenith you can use the scripts conda enviroment, which exists for this exact reson.
-You should contact Rory Flynn to get acess or who ever is maintaining it.
+You need to somehow install click, numpy, and pandas in your python environment, the how is up to you, conda or pip should both work.
+If you are in the lab and working on Zenith you can use the scripts conda environment, which exists for this exact reason.
+You should contact Rory Flynn to get access, or whoever is maintaining it if you are from the future.
 
 ## Getting started
 
 The tools in this repository are described below with examples.
-In order to use the example code you will need to download the full github repo using the command below.
+In order to use the example code, you will need to download the full github repo using the command below.
 
 ```
-https://github.com/WrightonLabCSU/sporulation_utils.git
+git clone https://github.com/WrightonLabCSU/sporulation_utils.git
 ```
 
 However, if you want to use one tool or file, and don't need the examples, just use the wget links in the tool sections.
@@ -32,11 +33,11 @@ To download this file:
 wget https://raw.githubusercontent.com/WrightonLabCSU/sporulation_utils/main/scripts/filter_amg_to_dist.py
 ```
 
-In the root of the repository you will find the `sporulation_distillate_module.tsv` this is used to create a custom dram/dram-v distillate with sporulation information included.
+In the root of the repository you will find the `sporulation_distillate_module.tsv` that is used to create a custom dram/dram-v distillate with sporulation information included.
 
 
 
-And to use this file with DRAM-v structure your comand like falows:
+And to use this file with `DRAM-v distill` structure your command like falows:
 
 ```
 DRAM-v.py distill \
@@ -55,11 +56,11 @@ To download this file:
 wget https://raw.githubusercontent.com/WrightonLabCSU/sporulation_utils/main/
 ```
 
-This script is not limited to this sporulation project but it is still a key part.
-When you run DRAM-v with a custom distillate sheet you still get all the AMG information that would normaly come with DRAM-v.
+This script is not limited to this sporulation project, but it is still a key part.
+When you run DRAM-v with a custom distillate sheet you still get all the AMG information that would normally come with DRAM-v.
 This script will take only the AMG information related to the distillate sheet that it is given as an argument.
 
-If you are in the root of the downloaded git repository you can test this script with this command.
+If you are in the root of the downloaded git repository, you can test this script with this command.
 
 ```
 python scripts/filter_amg_to_dist.py \
@@ -69,8 +70,8 @@ python scripts/filter_amg_to_dist.py \
 
 ```
 
-If you are only interested in the genes however you can use the --names only flag which will spit out the gene names related to you distallate module to standerd out.
-This output can be piped into other comands, here is an examep where we count them
+If you are only interested in the genes, you can use the --names_only flag which will spit out the gene names related to your distillate module to standard out.
+This output can be piped into other commands, here is an example where we count them
 
 ```
 python scripts/filter_amg_to_dist.py \
@@ -87,12 +88,17 @@ To download this file:
 wget https://raw.githubusercontent.com/WrightonLabCSU/sporulation_utils/main/scripts/spor_by_fam.py
 ```
 
-When VirHostMatcher is run  sporulator AMG containing viruses, identified with DRAM-v the output need to be transformed in order to be useible.
+When VirHostMatcher is run  sporulation AMG containing viruses, identified with DRAM-v, the output needs to be transformed in order to be useible.
 This script performs several transformations.
 
- * Using a required taxonomy file, with columns 'vMAG_id' and 'GTDB_string' the scrip will merge in the GTDB_string droping vMAGs that don't match.
- * Using a optional sporulation_list file containing GTDB strings and sporulation status, the script will add in spoulation status based on the family level of the taxonomy.
- * Finaly, the script will filter the data based on d2star measurement, <= 0.2 by default, and give 5 columns of output: Col1 - Virus ID; Col2 - d2* score; Col3 - Host ID; Col4 - Host GTDB Taxonomy String, Col5 - T/F on Sporulator/non-sporulator
+ * Using a required taxonomy file, with columns 'vMAG_id' and 'GTDB_string' the script will merge in the GTDB_string dropping vMAGs that don't match.
+ * Using an optional sporulation_list file containing GTDB strings and sporulation status, the script will add in spoulation status based on the family level of the taxonomy.
+ * Finally, the script will filter the data based on d2star measurement, <= 0.2 by default, and give 5 columns of output: 
+     * Col1 - Virus ID
+     * Col2 - d2* score
+     * Col3 - Host ID
+     * Col4 - Host GTDB Taxonomy String 
+     * Col5 - T/F on Sporulation/non-sporulating
 
 An example of how this script is run would be:
 ```
@@ -104,7 +110,7 @@ python scripts/spor_by_fam.py \
         test_output_with_spor_file \
         -s example_data/spor_by_fam/test_sporlist.csv
 
-# A example where we have no sporulator list.
+# An example where we have no sporulation list.
 rm -r test_output_no_spor_file
 python scripts/spor_by_fam.py \
         example_data/spor_by_fam/d2star_k6_1250.csv \
@@ -112,3 +118,4 @@ python scripts/spor_by_fam.py \
         test_output_no_spor_file
 
 ```
+

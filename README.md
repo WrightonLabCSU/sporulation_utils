@@ -1,6 +1,6 @@
 # Sporulation Utilities
 
-DRAM-v and DRAM are powerful tools that generate massive amounts of data and can distill that information to summaries of organismal metabolism.
+DRAM-v and DRAM are powerful tools that generate massive amounts of data and can distill that information into summaries of organismal metabolisms.
 With much power comes much complexity, great time and effort has gone into the metabolic pathways that are included with DRAM/DRAM-v, but these are only the surface of DRAMs potential.
 
 In this Repository we are collecting a set of tools that allow DRAM-v, and to an extent DRAM, to explore sporulation, throgh auxiliary metabolic genes (AMGs) that are key to it.

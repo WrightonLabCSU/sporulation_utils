@@ -110,6 +110,7 @@ def parse_spor_by_fam(virhost:str,
     output['Virus ID'] = output['Virus ID'].str.replace('\.fas$', '', regex=True)
     output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
     output['Virus ID'] = output['Virus ID'].str.replace('\.f$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.$', '', regex=True)
     if taxonomy_type == 2:
         tx_data = pd.read_csv(taxonomy, index_col=0)
     if taxonomy_type == 1:

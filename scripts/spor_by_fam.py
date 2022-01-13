@@ -7,7 +7,6 @@ import numpy as np
 from pathlib import Path
 import logging
 
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 
 def taxa_split(data):
@@ -32,6 +31,22 @@ def taxa_split(data):
                      axis=1)
     return data
 
+def add_auxiliary_score(data, amg_summary):
+    amg_data = pd.read_csv(amg_summary, sep='\t')
+    amg_data = amg_data[['scaffold', 'auxiliary_score']]
+    amg_data = amg_data.groupby('scaffold').apply(
+        lambda x: ", ".join([str(i) for i in x['auxiliary_score'].values]))
+    amg_data = pd.DataFrame(amg_data, columns=['auxiliary_score'])
+    amg_data.reset_index(inplace=True)
+    amg_data.rename(columns={'scaffold': 'Virus ID'}, inplace=True)
+    logging.info("The number of observations in the merged filterd data set"
+                 " that are not in the amg_data set, and so will not get"
+                 " auxiliary score data: %i",
+                 len(set(data['Virus ID']) - set(amg_data['Virus ID'])) )
+    breakpoint()
+    len(set(data['Virus ID']) - set(amg_data['Virus ID']))
+    data = pd.merge(data, amg_data, on='Virus ID',  how='left')
+    return data
 
 def add_sporulation_label(data, sporulator_def):
     is_spor = pd.read_csv(sporulator_def)
@@ -64,13 +79,19 @@ def add_sporulation_label(data, sporulator_def):
                 #, help="Path for the output folder. This can't alredy exist.")
 @click.option('-s', '--sporulator_def', type=click.Path(exists=True),
               default=None, help="The sporulator definitions.")
+@click.option('--amg_summary', type=click.Path(exists=True),
+              default=None, help="The sporulator definitions.")
 @click.option('-l', '--score_limit', default=0.2,
+              help="Maximum score to except.")
+@click.option('--taxonomy_type', default=1,
               help="Maximum score to except.")
 def parse_spor_by_fam(virhost:str,
                       taxonomy:str,
                       sporulator_def:str=None,
+                      amg_summary:str=None,
                       score_limit:float=0.2,
                       output_path:str='virhost_sporulators',
+                      taxonomy_type:int=2,
                       ):
     """
     :param virhost_out: Output CSV from virhostmatcher
@@ -78,9 +99,24 @@ def parse_spor_by_fam(virhost:str,
     :param sporulator_def:
     """
     # Read transformed virhost data
+    outpath = Path(output_path)
+    outpath.mkdir(parents=True, exist_ok=False)
+    logging.basicConfig(filename=str( outpath / 'data_process.log'), filemode='w',
+                        format='%(asctime)s %(message)s', level=logging.INFO)
     vh_data = pd.read_csv(virhost, index_col=0).T
-    vh_data.index = vh_data.index.str.replace('.fa', '', regex=False)
-    tx_data = pd.read_csv(taxonomy, index_col=0)
+    vh_data.index = vh_data.index.str.replace('\.fa$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fasta$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fast$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fas$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.f$', '', regex=True)
+    if taxonomy_type == 2:
+        tx_data = pd.read_csv(taxonomy, index_col=0)
+    if taxonomy_type == 1:
+        tx_data = pd.read_csv(taxonomy, sep='\t' )
+        tx_data.set_index('user_genome', inplace=True)
+        tx_data = tx_data[['classification']]
+        tx_data.columns = ['GTDB_string']
     data = pd.merge(vh_data, tx_data, right_index=True, left_index=True)
     data.reset_index(inplace=True)
 
@@ -117,11 +153,17 @@ def parse_spor_by_fam(virhost:str,
     output.columns = final_column_names
     pre_filter_len = len(output)
     output = output[output['Score'] <= score_limit]
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fasta$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fast$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fas$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
+    output['Virus ID'] = output['Virus ID'].str.replace('\.f$', '', regex=True)
     logging.info("The number of observations removed by the value filter: %i",
                  (pre_filter_len - len(output)))
 
-    outpath = Path(output_path)
-    outpath.mkdir(parents=True, exist_ok=False)
+    if amg_summary is not None:
+        output = add_auxiliary_score(output, amg_summary)
     output.to_csv(outpath / 'mag_vmag_info.csv', index=False)
 
 

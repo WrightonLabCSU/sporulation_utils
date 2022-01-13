@@ -39,12 +39,16 @@ def add_auxiliary_score(data, amg_summary):
     amg_data = pd.DataFrame(amg_data, columns=['auxiliary_score'])
     amg_data.reset_index(inplace=True)
     amg_data.rename(columns={'scaffold': 'Virus ID'}, inplace=True)
+    unmached_names = set(data['Virus ID']) - set(amg_data['Virus ID'])
     logging.info("The number of observations in the merged filterd data set"
                  " that are not in the amg_data set, and so will not get"
                  " auxiliary score data: %i",
-                 len(set(data['Virus ID']) - set(amg_data['Virus ID'])) )
-    breakpoint()
-    len(set(data['Virus ID']) - set(amg_data['Virus ID']))
+                 len(unmached_names))
+    if len(unmached_names) > 0:
+        logging.warning("These names in the merged filtered data set"
+                        " match none in the amg_data set: %s",
+                        str(unmached_names))
+
     data = pd.merge(data, amg_data, on='Virus ID',  how='left')
     return data
 
@@ -103,14 +107,23 @@ def parse_spor_by_fam(virhost:str,
     outpath.mkdir(parents=True, exist_ok=False)
     logging.basicConfig(filename=str( outpath / 'data_process.log'), filemode='w',
                         format='%(asctime)s %(message)s', level=logging.INFO)
+    # define a Handler which writes INFO messages or higher to the sys.stderr
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    # set a format which is simpler for console use
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    # tell the handler to use this format
+    console.setFormatter(formatter)
+    # add the handler to the root logger
+    logging.getLogger().addHandler(console)
     vh_data = pd.read_csv(virhost, index_col=0).T
     vh_data.index = vh_data.index.str.replace('\.fa$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fasta$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fast$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fas$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.f$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.$', '', regex=True)
+    vh_data.index = vh_data.index.str.replace('\.fasta$', '', regex=True)
+    vh_data.index = vh_data.index.str.replace('\.fast$', '', regex=True)
+    vh_data.index = vh_data.index.str.replace('\.fas$', '', regex=True)
+    vh_data.index = vh_data.index.str.replace('\.fa$', '', regex=True)
+    vh_data.index = vh_data.index.str.replace('\.f$', '', regex=True)
+    vh_data.index = vh_data.index.str.replace('\.$', '', regex=True)
     if taxonomy_type == 2:
         tx_data = pd.read_csv(taxonomy, index_col=0)
     if taxonomy_type == 1:

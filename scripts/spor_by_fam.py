@@ -61,7 +61,8 @@ def add_sporulation_label(data, sporulator_def):
     # for other parts of the taxonomy
     is_spor = is_spor[['f_spor', 'gtdb_f']].drop_duplicates()
     is_spor.columns = ['sporulator', 'family']
-    is_spor.dropna(inplace=True)
+    is_spor.fillna('Multiple lifestyle types', inplace=True)
+    # is_spor.dropna(inplace=True)
     logging.info("The number of observations in the sporulation by family"
                  " file that have matches in the VirHost+taxonomy file: %i",
                  len(set(is_spor['family']).intersection(set(data['family']))))

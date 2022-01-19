@@ -39,16 +39,29 @@ def add_auxiliary_score(data, amg_summary):
     amg_data = pd.DataFrame(amg_data, columns=['auxiliary_score'])
     amg_data.reset_index(inplace=True)
     amg_data.rename(columns={'scaffold': 'Virus ID'}, inplace=True)
-    unmached_names = set(data['Virus ID']) - set(amg_data['Virus ID'])
+    untrimed_names = set(amg_data['Virus ID'])
+    amg_data['Virus ID'] = amg_data['Virus ID'].str.slice(
+        0, data['Virus ID'].str.len().max())
+    unmached_names_no_trim = set(data['Virus ID']) - untrimed_names
+    unmached_names_trim = set(data['Virus ID']) - set(amg_data['Virus ID'])
     logging.info("The number of observations in the merged filterd data set"
-                 " that are not in the amg_data set, and so will not get"
-                 " auxiliary score data: %i",
-                 len(unmached_names))
-    if len(unmached_names) > 0:
+                 " that do not match those in the amg_data set before trimming"
+                 " strings to the 79 chariter limit: %i",
+                 len(unmached_names_no_trim))
+    logging.info("The number of observations in the merged filterd data set"
+                 " that are not in the amg_data set after trimming, and so"
+                 " will not get auxiliary score data: %i",
+                 len(unmached_names_trim))
+    dups = list(amg_data['Virus ID'][amg_data['Virus ID'].duplicated(keep='first')])
+    if len(dups) > 0:
+        logging.error("There are %i duplicated ids in the"
+                      " amg_data after trimming, and so the data can't"
+                      " be merged.\nThe duplicates are: %s",
+                      len(dups), str(dups))
+    if len(unmached_names_trim) > 0:
         logging.warning("These names in the merged filtered data set"
                         " match none in the amg_data set: %s",
-                        str(unmached_names))
-
+                        str(unmached_names_trim))
     data = pd.merge(data, amg_data, on='Virus ID',  how='left')
     return data
 

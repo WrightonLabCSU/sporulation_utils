@@ -40,15 +40,15 @@ def add_auxiliary_score(data, amg_summary):
     amg_data.reset_index(inplace=True)
     amg_data.rename(columns={'scaffold': 'Virus ID'}, inplace=True)
     untrimed_names = set(amg_data['Virus ID'])
-    amg_data['Virus ID'] = amg_data['Virus ID'].str.slice(
-        0, data['Virus ID'].str.len().max())
+    trim_len = data['Virus ID'].str.len().max()
+    amg_data['Virus ID'] = amg_data['Virus ID'].str.slice(0, trim_len)
     unmached_names_no_trim = set(data['Virus ID']) - untrimed_names
     unmached_names_trim = set(data['Virus ID']) - set(amg_data['Virus ID'])
-    logging.info("The number of observations in the merged filterd data set"
+    logging.info("The number of observations in the merged filtered data set"
                  " that do not match those in the amg_data set before trimming"
-                 " strings to the 79 chariter limit: %i",
-                 len(unmached_names_no_trim))
-    logging.info("The number of observations in the merged filterd data set"
+                 " strings to the %i character limit: %i",
+                 trim_len, len(unmached_names_no_trim))
+    logging.info("The number of observations in the merged filtered data set"
                  " that are not in the amg_data set after trimming, and so"
                  " will not get auxiliary score data: %i",
                  len(unmached_names_trim))

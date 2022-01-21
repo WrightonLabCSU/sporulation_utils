@@ -181,12 +181,13 @@ def parse_spor_by_fam(virhost:str,
     output.columns = final_column_names
     pre_filter_len = len(output)
     output = output[output['Score'] <= score_limit]
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fasta$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fast$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fas$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.fa$', '', regex=True)
-    output['Virus ID'] = output['Virus ID'].str.replace('\.f$', '', regex=True)
+    output['Virus ID'] = (output['Virus ID']
+                          .str.replace('\.fasta$', '', regex=True)
+                          .str.replace('\.fast$', '', regex=True)
+                          .str.replace('\.fas$', '', regex=True)
+                          .str.replace('\.fa$', '', regex=True)
+                          .str.replace('\.f$', '', regex=True)
+                          .str.replace('\.$', '', regex=True))
     logging.info("The number of observations removed by the value filter: %i",
                  (pre_filter_len - len(output)))
 

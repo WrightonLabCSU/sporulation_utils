@@ -131,13 +131,15 @@ def parse_spor_by_fam(virhost:str,
     # add the handler to the root logger
     logging.getLogger().addHandler(console)
     vh_data = pd.read_csv(virhost, index_col=0).T
-    vh_data.index = vh_data.index.str.replace('\.fa$', '', regex=True)
-    vh_data.index = vh_data.index.str.replace('\.fasta$', '', regex=True)
-    vh_data.index = vh_data.index.str.replace('\.fast$', '', regex=True)
-    vh_data.index = vh_data.index.str.replace('\.fas$', '', regex=True)
-    vh_data.index = vh_data.index.str.replace('\.fa$', '', regex=True)
-    vh_data.index = vh_data.index.str.replace('\.f$', '', regex=True)
-    vh_data.index = vh_data.index.str.replace('\.$', '', regex=True)
+    vh_data.index = (vh_data.index
+                     .str.replace('\.fasta$', '', regex=True)
+                     .str.replace('\.fast$', '', regex=True)
+                     .str.replace('\.fas$', '', regex=True)
+                     .str.replace('\.fa$', '', regex=True)
+                     .str.replace('\.fna$', '', regex=True)
+                     .str.replace('\.fn$', '', regex=True)
+                     .str.replace('\.f$', '', regex=True)
+                     .str.replace('\.$', '', regex=True))
     if taxonomy_type == 2:
         tx_data = pd.read_csv(taxonomy, index_col=0)
     if taxonomy_type == 1:
@@ -161,6 +163,9 @@ def parse_spor_by_fam(virhost:str,
                  len(vh_data.index.unique()))
     logging.info("Number of unique mags in taxonomy file: %i",
                  len(tx_data.index.unique()))
+    if len(data) < 1:
+        logging.error("The names of the mags in virHost don't match those"
+                      " in the taxonomy. This prevents them from merging!")
     logging.info("Number of unique mags in both VirHost and taxonomy: %i",
                  len(data.index.unique()))
     logging.info("Number of VirHost mags dropped because there is"
@@ -182,12 +187,14 @@ def parse_spor_by_fam(virhost:str,
     pre_filter_len = len(output)
     output = output[output['Score'] <= score_limit]
     output['Virus ID'] = (output['Virus ID']
-                          .str.replace('\.fasta$', '', regex=True)
-                          .str.replace('\.fast$', '', regex=True)
-                          .str.replace('\.fas$', '', regex=True)
-                          .str.replace('\.fa$', '', regex=True)
-                          .str.replace('\.f$', '', regex=True)
-                          .str.replace('\.$', '', regex=True))
+                          .str.replace(r'\.fasta$', '', regex=True)
+                          .str.replace(r'\.fast$', '', regex=True)
+                          .str.replace(r'\.fas$', '', regex=True)
+                          .str.replace(r'\.fa$', '', regex=True)
+                          .str.replace('\.fna$', '', regex=True)
+                          .str.replace('\.fn$', '', regex=True)
+                          .str.replace(r'\.f$', '', regex=True)
+                          .str.replace(r'\.$', '', regex=True))
     logging.info("The number of observations removed by the value filter: %i",
                  (pre_filter_len - len(output)))
 

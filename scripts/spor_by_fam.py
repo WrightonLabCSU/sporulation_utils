@@ -147,6 +147,8 @@ def parse_spor_by_fam(virhost:str,
         tx_data.set_index('user_genome', inplace=True)
         tx_data = tx_data[['classification']]
         tx_data.columns = ['GTDB_string']
+    vh_data.index = vh_data.index.astype(str)
+    tx_data.index = tx_data.index.astype(str)
     data = pd.merge(vh_data, tx_data, right_index=True, left_index=True)
     data.reset_index(inplace=True)
 

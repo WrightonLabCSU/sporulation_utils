@@ -103,6 +103,8 @@ def add_sporulation_label(data, sporulator_def):
               help="Maximum score to except.")
 @click.option('--taxonomy_type', default=1,
               help="Maximum score to except.")
+@click.option('--count_only/--count_and_write', default=False,
+              help="Only make counts so you can save a small amount of time.")
 def parse_spor_by_fam(virhost:str,
                       taxonomy:str,
                       sporulator_def:str=None,
@@ -110,6 +112,7 @@ def parse_spor_by_fam(virhost:str,
                       score_limit:float=0.2,
                       output_path:str='virhost_sporulators',
                       taxonomy_type:int=2,
+                      count_only:bool=False
                       ):
     """
     :param virhost_out: Output CSV from virhostmatcher
@@ -175,7 +178,7 @@ def parse_spor_by_fam(virhost:str,
                  len(set(vh_data.index) - set(data.index)))
 
 
-    # sporulator or non sporulator flage
+    # sporulator or non sporulator flag
     if sporulator_def is not None:
         data = add_sporulation_label(data, sporulator_def)
         data_id_vars += ['sporulator']
@@ -200,6 +203,22 @@ def parse_spor_by_fam(virhost:str,
     logging.info("The number of observations removed by the value filter: %i",
                  (pre_filter_len - len(output)))
 
+    
+    logging.info("The number of observations removed by the value filter: %i",
+                 (pre_filter_len - len(output)))
+    counts = output['Sporulator'].value_counts(dropna=False)
+    spor_counts = pd.DataFrame({"Labeled Sporulator": counts[True],
+                                "Labeled Non-Sporulator": counts[False], 
+                                "Unlabeled Assumed Non-Sporulator": counts[np.NaN], 
+                                "All Non-Sporulator": counts[False] + counts[np.NaN]
+                                }, index=['Count']).T
+
+    spor_counts['Percent'] =  (spor_counts['Count']/len(output)) * 100
+    logging.info(spor_counts.T)
+    spor_counts.T.to_csv(outpath / 'spor_count_precent.csv', index=False)
+    if count_only:
+        return
+    
     if amg_summary is not None:
         output = add_auxiliary_score(output, amg_summary)
     output.to_csv(outpath / 'mag_vmag_info.csv', index=False)

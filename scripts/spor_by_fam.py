@@ -215,7 +215,7 @@ def parse_spor_by_fam(virhost:str,
 
     spor_counts['Percent'] =  (spor_counts['Count']/len(output)) * 100
     logging.info(spor_counts.T)
-    spor_counts.T.to_csv(outpath / 'spor_count_percent.csv', index=False)
+    spor_counts.T.to_csv(outpath / 'spor_count_percent.csv')
     if count_only:
         return
     
